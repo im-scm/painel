@@ -204,7 +204,10 @@ function setKPI(id, arr) {
     el.innerHTML = arr.map(i => `
         <div class="kpi-item">
             <span>${i.label}</span>
-            <span class="value">${i.val.toLocaleString('pt-BR')}</span>
+            <span class="value">${i.val.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}</span>
         </div>
     `).join('');
 }
@@ -348,9 +351,38 @@ function formatDateBR(date) {
     return `${d}/${m}/${y}`;
 }
 
+function applyDateFilter() {
+
+    const startInput = document.getElementById('startDate');
+    const endInput = document.getElementById('endDate');
+
+    if (!startInput.value || !endInput.value) return;
+
+    const parse = (str) => {
+        const [d, m, y] = str.split('/');
+        return new Date(Date.UTC(y, m - 1, d));
+    };
+
+    const start = parse(startInput.value);
+    const end = parse(endInput.value);
+
+    filteredData = globalData.filter(d =>
+        d.Data >= start && d.Data <= end
+    );
+
+    updateAll();
+}
+
 // ================= INIT =================
 document.addEventListener('DOMContentLoaded', () => {
+
     loadDatabaseFile();
+
+    document.getElementById('startDate')
+        .addEventListener('change', applyDateFilter);
+
+    document.getElementById('endDate')
+        .addEventListener('change', applyDateFilter);
 });
 
 window.handleFileSelect = handleFileSelect;
