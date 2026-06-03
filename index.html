@@ -1,176 +1,58 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Monitoramento - SCM Impress Decor</title>
+<meta charset="UTF-8">
+<title>SCM Dashboard</title>
 
-    <link rel="icon" href="im.ico" type="image/x-icon">
-    <link rel="stylesheet" href="style.css">
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
+
 <div class="container">
 
-<header class="header">
-    <div class="header-content">
-        <h1>Dashboard de Monitoramento - SCM Impress Decor</h1>
-    </div>
-</header>
+<h1>SCM Dashboard</h1>
 
-<!-- FILTROS -->
-<div class="filters-section">
-    <div class="date-filters">
-        <div class="filter-group">
-            <label>Data Inicial</label>
-            <input type="text" id="startDate" placeholder="dd/mm/aaaa">
-        </div>
-        <div class="filter-group">
-            <label>Data Final</label>
-            <input type="text" id="endDate" placeholder="dd/mm/aaaa">
-        </div>
-    </div>
+<!-- ✅ UPLOAD RESTAURADO -->
+<button onclick="document.getElementById('fileInput').click()">
+Upload Excel
+</button>
+
+<div ondrop="dropHandler(event)" ondragover="dragOverHandler(event)"
+     style="border:1px dashed grey; padding:10px; margin:10px;">
+Arraste Excel aqui
 </div>
 
-<div id="uploadStatus" class="upload-status hidden"></div>
 <input type="file" id="fileInput" style="display:none;" onchange="handleFileSelect(event)">
 
 <!-- ================= KPIs ================= -->
-<section class="kpi-section">
-    <h2>Indicadores Principais</h2>
+<div class="kpis">
 
-    <div class="kpi-boxes">
+<div id="celuloseKPI"></div>
+<div id="celuloseCNKPI"></div>
+<div id="tio2KPI"></div>
+<div id="resinasKPI"></div>
+<div id="freteImportKPI"></div>
+<div id="freteExportKPI"></div>
 
-        <!-- Celulose EU -->
-        <div class="kpi-box">
-            <h3>Celulose EU</h3>
-            <div id="celuloseKPI"></div>
-        </div>
+</div>
 
-        <!-- Celulose CN -->
-        <div class="kpi-box">
-            <h3>Celulose CN</h3>
-            <div id="celuloseCNKPI"></div>
-        </div>
-
-        <!-- TIO2 -->
-        <div class="kpi-box">
-            <h3>TIO2</h3>
-            <div id="tio2KPI"></div>
-        </div>
-
-        <!-- Resinas -->
-        <div class="kpi-box">
-            <h3>Resinas</h3>
-            <div id="resinasKPI"></div>
-        </div>
-
-        <!-- Frete Import -->
-        <div class="kpi-box">
-            <h3>Frete Import</h3>
-            <div id="freteImportKPI"></div>
-        </div>
-
-        <!-- Frete Export -->
-        <div class="kpi-box">
-            <h3>Frete Export</h3>
-            <div id="freteExportKPI"></div>
-        </div>
-
-    </div>
-</section>
-
-<!-- ================= GRÁFICOS ================= -->
-<section class="charts-section">
-
-    <!-- CELULOSE -->
-    <div class="chart-container">
-        <h3>Celulose Fibra Curta (BHKP)</h3>
-        <div class="chart-row">
-            <canvas id="celuloseChart"></canvas>
-            <div id="celuloseMetrics"></div>
-        </div>
-    </div>
-
-    <!-- TIO2 -->
-    <div class="chart-container">
-        <h3>Dióxido de Titânio (TIO2)</h3>
-        <div class="chart-row">
-            <canvas id="tio2Chart"></canvas>
-            <div id="tio2Metrics"></div>
-        </div>
-    </div>
-
-    <!-- METANOL -->
-    <div class="chart-container">
-        <h3>Insumos Resinas - Metanol</h3>
-        <div class="chart-row">
-            <canvas id="metanolChart"></canvas>
-            <div id="metanolMetrics"></div>
-        </div>
-    </div>
-
-    <!-- UREIA -->
-    <div class="chart-container">
-        <h3>Insumos Resinas - Ureia</h3>
-        <div class="chart-row">
-            <canvas id="ureiaChart"></canvas>
-            <div id="ureiaMetrics"></div>
-        </div>
-    </div>
-
-    <!-- MELAMINA -->
-    <div class="chart-container">
-        <h3>Insumos Resinas - Melamina</h3>
-        <div class="chart-row">
-            <canvas id="melaminaChart"></canvas>
-            <div id="melaminaMetrics"></div>
-        </div>
-    </div>
-
-    <!-- RESINAS -->
-    <div class="chart-container">
-        <h3>Resinas Prontas</h3>
-        <div class="chart-row">
-            <canvas id="resinasChart"></canvas>
-            <div id="resinasMetrics"></div>
-        </div>
-    </div>
-
-    <!-- CAMBIO -->
-    <div class="chart-container">
-        <h3>Câmbio Mês (BRL)</h3>
-        <div class="chart-row">
-            <canvas id="moedasChart"></canvas>
-            <div id="moedasMetrics"></div>
-        </div>
-    </div>
-
-    <!-- FRETE IMPORT -->
-    <div class="chart-container">
-        <h3>Frete Importação</h3>
-        <div class="chart-row">
-            <canvas id="freteImportChart"></canvas>
-            <div id="freteimportMetrics"></div>
-        </div>
-    </div>
-
-    <!-- FRETE EXPORT -->
-    <div class="chart-container">
-        <h3>Frete Exportação</h3>
-        <div class="chart-row">
-            <canvas id="freteExportChart"></canvas>
-            <div id="freteexportMetrics"></div>
-        </div>
-    </div>
-
-</section>
+<!-- ================= CHARTS ================= -->
+<canvas id="celuloseChart"></canvas>
+<canvas id="tio2Chart"></canvas>
+<canvas id="metanolChart"></canvas>
+<canvas id="ureiaChart"></canvas>
+<canvas id="melaminaChart"></canvas>
+<canvas id="resinasChart"></canvas>
+<canvas id="moedasChart"></canvas>
+<canvas id="freteimportChart"></canvas>
+<canvas id="freteexportChart"></canvas>
 
 </div>
 
 <script src="app.js"></script>
+
 </body>
 </html>
