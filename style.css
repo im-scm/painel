@@ -413,11 +413,9 @@ font-size: var(--font-size-2xl);
 }
 
 .kpi-boxes {
-display: grid;
-grid-template-columns: repeat(5, 1fr);
-gap: var(--space-16);
-width: 100%;
-margin-bottom: var(--space-32);
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* ✅ força 6 colunas */
+    gap: 15px;
 }
 
 @media (max-width: 1200px) {
