@@ -167,6 +167,10 @@ function createChart(id, config) {
                 borderColor: s.color,
                 tension: 0.3
             }))
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // ✅ ESSENCIAL
         }
     });
 }
