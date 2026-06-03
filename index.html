@@ -1,54 +1,229 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>SCM Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Monitoramento - SCM Impress Decor</title>
 
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <link rel="icon" href="im.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
-
 <div class="container">
 
-<h1>SCM Dashboard</h1>
+<header class="header">
+    <div class="header-content">
+        <h1>Dashboard de Monitoramento - SCM Impress Decor</h1>
+    </div>
+</header>
 
-<!-- ✅ UPLOAD RESTAURADO -->
-<button onclick="document.getElementById('fileInput').click()">
-Upload Excel
-</button>
+<!-- ================= FILTROS + UPLOAD ================= -->
+<div class="filters-section">
 
-<div ondrop="dropHandler(event)" ondragover="dragOverHandler(event)"
-     style="border:1px dashed grey; padding:10px; margin:10px;">
-Arraste Excel aqui
+    <div class="date-filters">
+        <div class="filter-group">
+            <label for="startDate" class="form-label">Data Inicial</label>
+            <input type="text" id="startDate" class="form-control date-input" placeholder="dd/mm/aaaa">
+        </div>
+        <div class="filter-group">
+            <label for="endDate" class="form-label">Data Final</label>
+            <input type="text" id="endDate" class="form-control date-input" placeholder="dd/mm/aaaa">
+        </div>
+    </div>
+
+    <!-- ✅ RESTAURADO COMPLETO -->
+    <div class="upload-section">
+        <div class="upload-controls">
+
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                <span class="upload-icon">📁</span>
+                <span class="upload-text">Upload Excel</span>
+            </button>
+
+            <div class="upload-zone"
+                 ondrop="dropHandler(event);"
+                 ondragover="dragOverHandler(event);"
+                 ondragenter="dragEnterHandler(event);"
+                 ondragleave="dragLeaveHandler(event);">
+
+                <span class="drag-text">Arraste aqui</span>
+            </div>
+
+        </div>
+
+        <div class="upload-info">Formatos aceitos: .xlsx, .xls</div>
+    </div>
+
 </div>
 
-<input type="file" id="fileInput" style="display:none;" onchange="handleFileSelect(event)">
+<div id="uploadStatus" class="upload-status hidden"></div>
+
+<input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;" onchange="handleFileSelect(event)">
 
 <!-- ================= KPIs ================= -->
-<div class="kpis">
+<section class="kpi-section">
+    <h2>Indicadores Principais</h2>
 
-<div id="celuloseKPI"></div>
-<div id="celuloseCNKPI"></div>
-<div id="tio2KPI"></div>
-<div id="resinasKPI"></div>
-<div id="freteImportKPI"></div>
-<div id="freteExportKPI"></div>
+    <div class="kpi-boxes">
 
-</div>
+        <!-- ✅ Celulose EU (renomeado) -->
+        <div class="kpi-box">
+            <div class="kpi-header">
+                <h3>Celulose EU</h3>
+            </div>
+            <div class="kpi-values" id="celuloseKPI"></div>
+        </div>
 
-<!-- ================= CHARTS ================= -->
-<canvas id="celuloseChart"></canvas>
-<canvas id="tio2Chart"></canvas>
-<canvas id="metanolChart"></canvas>
-<canvas id="ureiaChart"></canvas>
-<canvas id="melaminaChart"></canvas>
-<canvas id="resinasChart"></canvas>
-<canvas id="moedasChart"></canvas>
-<canvas id="freteimportChart"></canvas>
-<canvas id="freteexportChart"></canvas>
+        <!-- ✅ NOVO -->
+        <div class="kpi-box">
+            <div class="kpi-header">
+                <h3>Celulose CN</h3>
+            </div>
+            <div class="kpi-values" id="celuloseCNKPI"></div>
+        </div>
+
+        <!-- ✅ TIO2 atualizado -->
+        <div class="kpi-box">
+            <div class="kpi-header">
+                <h3>TIO2</h3>
+            </div>
+            <div class="kpi-values" id="tio2KPI"></div>
+        </div>
+
+        <!-- ✅ Resinas -->
+        <div class="kpi-box">
+            <div class="kpi-header">
+                <h3>Resinas</h3>
+            </div>
+            <div class="kpi-values" id="resinasKPI"></div>
+        </div>
+
+        <!-- ✅ Frete Import -->
+        <div class="kpi-box">
+            <div class="kpi-header">
+                <h3>Frete Import</h3>
+            </div>
+            <div class="kpi-values" id="freteImportKPI"></div>
+        </div>
+
+        <!-- ✅ Frete Export -->
+        <div class="kpi-box">
+            <div class="kpi-header">
+                <h3>Frete Export</h3>
+            </div>
+            <div class="kpi-values" id="freteExportKPI"></div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ================= GRÁFICOS ================= -->
+<section class="charts-section">
+
+    <!-- Celulose -->
+    <div class="chart-container">
+        <h3>Celulose Fibra Curta (BHKP)</h3>
+        <div class="chart-row">
+            <div class="chart-wrapper">
+                <canvas id="celuloseChart"></canvas>
+            </div>
+            <div class="metrics-box" id="celuloseMetrics"></div>
+        </div>
+    </div>
+
+    <!-- TIO2 -->
+    <div class="chart-container">
+        <h3>Dióxido de Titânio (TIO2)</h3>
+        <div class="chart-row">
+            <div class="chart-wrapper">
+                <canvas id="tio2Chart"></canvas>
+            </div>
+            <div class="metrics-box" id="tio2Metrics"></div>
+        </div>
+    </div>
+
+    <!-- ✅ METANOL -->
+    <div class="chart-container">
+        <h3>Insumos Resinas - Metanol</h3>
+        <div class="chart-row">
+            <div class="chart-wrapper">
+                <canvas id="metanolChart"></canvas>
+            </div>
+            <div class="metrics-box" id="metanolMetrics"></div>
+        </div>
+    </div>
+
+    <!-- ✅ UREIA -->
+    <div class="chart-container">
+        <h3>Insumos Resinas - Ureia</h3>
+        <div class="chart-row">
+            <div class="chart-wrapper">
+                <canvas id="ureiaChart"></canvas>
+            </div>
+            <div class="metrics-box" id="ureiaMetrics"></div>
+        </div>
+    </div>
+
+    <!-- ✅ MELAMINA -->
+    <div class="chart-container">
+        <h3>Insumos Resinas - Melamina</h3>
+        <div class="chart-row">
+            <div class="chart-wrapper">
+                <canvas id="melaminaChart"></canvas>
+            </div>
+            <div class="metrics-box" id="melaminaMetrics"></div>
+        </div>
+    </div>
+
+    <!-- Resinas -->
+    <div class="chart-container">
+        <h3>Resinas Prontas</h3>
+        <div class="chart-row">
+            <div class="chart-wrapper">
+                <canvas id="resinasChart"></canvas>
+            </div>
+            <div class="metrics-box" id="resinasMetrics"></div>
+        </div>
+    </div>
+
+    <!-- Câmbio -->
+    <div class="chart-container">
+        <h3>Câmbio Mês (BRL)</h3>
+        <div class="chart-row">
+            <div class="chart-wrapper">
+                <canvas id="moedasChart"></canvas>
+            </div>
+            <div class="metrics-box" id="moedasMetrics"></div>
+        </div>
+    </div>
+
+    <!-- Frete Import -->
+    <div class="chart-container">
+        <h3>Frete Importação</h3>
+        <div class="chart-row">
+            <div class="chart-wrapper">
+                <canvas id="freteimportChart"></canvas>
+            </div>
+            <div class="metrics-box" id="freteimportMetrics"></div>
+        </div>
+    </div>
+
+    <!-- Frete Export -->
+    <div class="chart-container">
+        <h3>Frete Exportação</h3>
+        <div class="chart-row">
+            <div class="chart-wrapper">
+                <canvas id="freteexportChart"></canvas>
+            </div>
+            <div class="metrics-box" id="freteexportMetrics"></div>
+        </div>
+    </div>
+
+</section>
 
 </div>
 
@@ -56,3 +231,4 @@ Arraste Excel aqui
 
 </body>
 </html>
+``
