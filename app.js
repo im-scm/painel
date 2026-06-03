@@ -158,9 +158,7 @@ function createChart(id, config) {
     charts[id] = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: filteredData.map(d =>
-                d.Data.toLocaleDateString('pt-BR', { timeZone: 'UTC' })
-            ),
+            labels: filteredData.map(d => formatDateBR(d.Data)),
             datasets: config.map(s => ({
                 label: s.label,
                 data: filteredData.map(d => d[s.field]),
@@ -281,6 +279,14 @@ function updateAllMetrics() {
         updateChartMetrics(chart);
     });
 }
+
+function formatDateBR(date) {
+    const d = String(date.getUTCDate()).padStart(2, '0');
+    const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const y = date.getUTCFullYear();
+    return `${d}/${m}/${y}`;
+}
+
 
 // ================= INIT =================
 document.addEventListener('DOMContentLoaded', () => {
