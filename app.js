@@ -3,62 +3,43 @@ let globalData = [];
 let filteredData = [];
 let charts = {};
 
-// ================= CORES =================
-const chartColors = {
-    terracotta: '#B34A3A',
-    terracottaLight: '#CD853F',
-    violet: '#4A148C',
-    brown: '#8B4513',
-    olive: '#6B8E23',
-    stone: '#708090'
-};
-
-// ================= CONFIG DE SÉRIES =================
+// ================= CONFIG =================
 const chartSeriesConfig = {
-
     celulose: [
         { field: 'BHKP_IM', label: 'IM', color: '#CD853F' },
         { field: 'BHKP_EU', label: 'EU', color: '#6B8E23' },
         { field: 'BHKP_CN', label: 'CN', color: '#708090' }
     ],
-
     tio2: [
         { field: 'TIO2_IM', label: 'IM', color: '#4A148C' },
         { field: 'TIO2_CN', label: 'CN', color: '#CD853F' }
     ],
-
     metanol: [
         { field: 'MET_GPC', label: 'GPC', color: '#708090' },
         { field: 'MET_MN', label: 'MN', color: '#CD853F' }
     ],
-
     ureia: [
         { field: 'URE_GPC', label: 'GPC', color: '#6B8E23' },
         { field: 'URE_ME', label: 'ME', color: '#CD853F' }
     ],
-
     melamina: [
         { field: 'MEL_GPC', label: 'GPC', color: '#CD853F' },
         { field: 'MEL_CN', label: 'CN', color: '#708090' }
     ],
-
     resinas: [
         { field: 'RES_UF', label: 'UF', color: '#6B8E23' },
         { field: 'RES_MF', label: 'MF', color: '#CD853F' },
         { field: 'USDBRL_GPC', label: 'USD', color: '#708090' }
     ],
-
     moedas: [
         { field: 'USDBRL', label: 'USD', color: '#6B8E23' },
         { field: 'EURBRL', label: 'EUR', color: '#708090' },
         { field: 'CNYBRL', label: 'CNY', color: '#CD853F' }
     ],
-
     freteimport: [
         { field: 'CNT_EU_EUR', label: 'EU', color: '#6B8E23' },
         { field: 'CNT_CN_USD', label: 'CN', color: '#CD853F' }
     ],
-
     freteexport: [
         { field: 'CNT_GQ_USD', label: 'GQ', color: '#6B8E23' },
         { field: 'CNT_CG_USD', label: 'CG', color: '#8B4513' },
@@ -71,15 +52,14 @@ function parseNumber(v) {
     return typeof v === 'number' ? v : parseFloat(v) || 0;
 }
 
+// ✅ CORREÇÃO DATA (CRÍTICO)
 function parseDateBR(value) {
-    // Excel date number
     if (typeof value === 'number') {
         const utc_days = Math.floor(value - 25569);
         const date = new Date(utc_days * 86400 * 1000);
         return new Date(date.getFullYear(), date.getMonth(), date.getDate());
     }
 
-    // string dd/mm/yyyy
     if (typeof value === 'string') {
         const parts = value.split('/');
         if (parts.length === 3) {
@@ -90,7 +70,7 @@ function parseDateBR(value) {
     return null;
 }
 
-// ================= PROCESSAMENTO =================
+// ================= PROCESS =================
 function processData(data) {
     return data.map(r => {
         Object.keys(r).forEach(k => {
@@ -116,15 +96,12 @@ function loadDatabaseFile() {
             globalData = processData(json);
             filteredData = [...globalData];
 
-            
-            // ✅ DEBUG (INSERIR AQUI)
-            console.log("✅ Dados carregados:", globalData.length);
-            console.log("✅ Primeira linha:", globalData[0]);
+            console.log("✅ AUTO LOAD:", globalData.length);
 
             updateAll();
         })
-        .catch(() => {
-            console.warn('⚠️ Auto load falhou — use upload manual');
+        .catch(e => {
+            console.warn("⚠️ Auto load falhou", e);
         });
 }
 
@@ -141,24 +118,25 @@ function handleFileSelect(e) {
 
         globalData = processData(json);
         filteredData = [...globalData];
-   
-        // ✅ DEBUG (INSERIR AQUI)
-        console.log("✅ Dados carregados:", globalData.length);
-        console.log("✅ Primeira linha:", globalData[0]);
+
+        console.log("✅ UPLOAD:", globalData.length);
 
         updateAll();
     };
     reader.readAsArrayBuffer(file);
 }
 
-// drag-drop
+// ✅ FALTAVAM ESSAS FUNÇÕES
 function dropHandler(e) {
     e.preventDefault();
     handleFileSelect({ target: { files: e.dataTransfer.files } });
 }
-function dragOverHandler(e) { e.preventDefault(); }
 
-// ================= KPI =================
+function dragOverHandler(e) { e.preventDefault(); }
+function dragEnterHandler(e) { e.preventDefault(); }
+function dragLeaveHandler(e) { e.preventDefault(); }
+
+// ================= KPIs =================
 function updateKPIs() {
     const d = filteredData.at(-1);
     if (!d) return;
@@ -168,9 +146,7 @@ function updateKPIs() {
         { label: 'EU', val: d.BHKP_EU }
     ]);
 
-    setKPI('celuloseCNKPI', [
-        { label: 'CN', val: d.BHKP_CN }
-    ]);
+    setKPI('celuloseCNKPI', [{ label: 'CN', val: d.BHKP_CN }]);
 
     setKPI('tio2KPI', [
         { label: 'IM', val: d.TIO2_IM },
@@ -206,7 +182,7 @@ function setKPI(id, arr) {
     `).join('');
 }
 
-// ================= GRÁFICOS =================
+// ================= CHART =================
 function createChart(id, cfg) {
     const ctx = document.getElementById(id);
     if (!ctx) return;
@@ -233,7 +209,7 @@ function updateCharts() {
     });
 }
 
-// ================= UPDATE ALL =================
+// ================= UPDATE =================
 function updateAll() {
     updateCharts();
     updateKPIs();
@@ -241,10 +217,10 @@ function updateAll() {
 
 // ================= INIT =================
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("XLSX disponível?", typeof XLSX);
     loadDatabaseFile();
 });
 
-// expose
 window.handleFileSelect = handleFileSelect;
 window.dropHandler = dropHandler;
 window.dragOverHandler = dragOverHandler;
