@@ -50,12 +50,20 @@ const chartSeriesConfig = {
 // ================= FIX DATA (CRÍTICO) =================
 function parseDateBR(value) {
 
-    // Excel number → manter UTC
+    // ✅ Caso Excel (número serial)
     if (typeof value === 'number') {
-        const utc_days = Math.floor(value - 25569);
-        return new Date(Date.UTC(1970, 0, utc_days));
+
+        const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+        const date = new Date(excelEpoch.getTime() + value * 86400000);
+
+        return new Date(Date.UTC(
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate()
+        ));
     }
 
+    // ✅ Caso string dd/mm/yyyy
     if (typeof value === 'string') {
         const p = value.split('/');
         if (p.length === 3) {
