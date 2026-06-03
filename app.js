@@ -80,6 +80,27 @@ function processData(data) {
       .sort((a, b) => a.Data - b.Data);
 }
 
+function updateDateInputs() {
+
+    if (!filteredData.length) return;
+
+    const first = filteredData[0].Data;
+    const last = filteredData[filteredData.length - 1].Data;
+
+    const format = (date) => {
+        const d = String(date.getUTCDate()).padStart(2, '0');
+        const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const y = date.getUTCFullYear();
+        return `${d}/${m}/${y}`;
+    };
+
+    const startInput = document.getElementById('startDate');
+    const endInput = document.getElementById('endDate');
+
+    if (startInput) startInput.value = format(first);
+    if (endInput) endInput.value = format(last);
+}
+
 // ================= LOAD =================
 function loadDatabaseFile() {
     fetch('./app_scm_data.xlsx')
@@ -94,6 +115,8 @@ function loadDatabaseFile() {
             filteredData = [...globalData];
 
             console.log("✅ AUTO:", globalData.length);
+            
+            updateDateInputs();
 
             updateAll();
         });
