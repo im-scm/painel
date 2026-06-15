@@ -406,6 +406,10 @@ border-color: rgba(var(--color-error-rgb), 0.25);
 }
 
 /* ----- KPI BOXES ----- */
+.kpi-section {
+    margin-bottom: 32px;
+}
+
 .kpi-section h2 {
 margin-bottom: var(--space-16);
 color: var(--color-text);
