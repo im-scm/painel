@@ -730,7 +730,7 @@ min-width: 100%;
 }
 
 .chart-source {
-    margin-top: 14px;
+    margin-top: 16px;
     font-size: 10px;
     color: var(--color-text-secondary);
     opacity: 0.85;
