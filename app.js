@@ -29,12 +29,12 @@ const chartSeriesConfig = {
     resinas: [
         { field: 'RES_UF', label: 'UF', color: '#6B8E23' },
         { field: 'RES_MF', label: 'MF', color: '#CD853F' },
-        { field: 'USDBRL_GPC', label: 'USD', color: '#708090', yAxis: 'y1' }
+        { field: 'USDBRL_GPC', label: 'USD', color: '#708090', yAxis: 'y1', borderDash: [8, 4] }
     ],
     moedas: [
         { field: 'USDBRL', label: 'USD', color: '#6B8E23' },
         { field: 'EURBRL', label: 'EUR', color: '#708090' },
-        { field: 'CNYBRL', label: 'CNY', color: '#CD853F', yAxis: 'y1' }
+        { field: 'CNYBRL', label: 'CNY', color: '#CD853F', yAxis: 'y1', borderDash: [8, 4] }
     ],
     freteimport: [
         { field: 'CNT_EU_EUR', label: 'EU', color: '#6B8E23' },
@@ -49,13 +49,10 @@ const chartSeriesConfig = {
 
 // ================= FIX DATA (CRÍTICO) =================
 function parseDateBR(value) {
-
     // ✅ Caso Excel (número serial)
     if (typeof value === 'number') {
-
         const excelEpoch = new Date(Date.UTC(1899, 11, 30));
         const date = new Date(excelEpoch.getTime() + value * 86400000);
-
         return new Date(Date.UTC(
             date.getUTCFullYear(),
             date.getUTCMonth(),
@@ -80,16 +77,13 @@ function processData(data) {
         Object.keys(r).forEach(k => {
             if (k !== 'Data') r[k] = parseFloat(r[k]) || 0;
         });
-
         r.Data = parseDateBR(r.Data);
         return r;
-
     }).filter(r => r.Data)
       .sort((a, b) => a.Data - b.Data);
 }
 
 function updateDateInputs() {
-
     if (!filteredData.length) return;
 
     const first = filteredData[0].Data;
@@ -114,7 +108,6 @@ function loadDatabaseFile() {
     fetch('./app_scm_data.xlsx')
         .then(r => r.arrayBuffer())
         .then(data => {
-
             const wb = XLSX.read(data, { type: 'array' });
             const ws = wb.Sheets['Final'] || wb.Sheets[wb.SheetNames[0]];
             const json = XLSX.utils.sheet_to_json(ws);
@@ -123,22 +116,22 @@ function loadDatabaseFile() {
             filteredData = [...globalData];
 
             console.log("✅ AUTO:", globalData.length);
-            
-            updateDateInputs();
 
+            updateDateInputs();
             updateAll();
+        })
+        .catch(err => {
+            console.error("❌ ERRO AO CARREGAR BASE:", err);
         });
 }
 
 function handleFileSelect(event) {
-
     const file = event.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
 
     reader.onload = function(e) {
-
         try {
             const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
             const ws = wb.Sheets['Final'] || wb.Sheets[wb.SheetNames[0]];
@@ -151,7 +144,6 @@ function handleFileSelect(event) {
 
             updateDateInputs();
             updateAll();
-
         } catch (err) {
             console.error("❌ ERRO NO UPLOAD:", err);
         }
@@ -200,6 +192,7 @@ function updateKPIs() {
 
 function setKPI(id, arr) {
     const el = document.getElementById(id);
+    if (!el) return;
 
     el.innerHTML = arr.map(i => `
         <div class="kpi-item">
@@ -214,10 +207,12 @@ function setKPI(id, arr) {
 
 // ================= CHART =================
 function createChart(id, config) {
-
     const ctx = document.getElementById(id);
+    if (!ctx) return;
 
     if (charts[id]) charts[id].destroy();
+
+    const hasSecondaryAxis = config.some(s => s.yAxis === 'y1');
 
     charts[id] = new Chart(ctx, {
         type: 'line',
@@ -227,20 +222,35 @@ function createChart(id, config) {
                 label: s.label,
                 data: filteredData.map(d => d[s.field]),
                 borderColor: s.color,
+                backgroundColor: s.color,
                 tension: 0.3,
-                yAxisID: s.yAxis || 'y'
+                yAxisID: s.yAxis || 'y',
+                borderDash: s.borderDash || [],
+                borderWidth: 2,
+                pointRadius: 2,
+                pointHoverRadius: 4,
+                fill: false
             }))
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
             scales: {
                 y: {
                     type: 'linear',
                     position: 'left'
                 },
                 y1: {
+                    display: hasSecondaryAxis,
                     type: 'linear',
                     position: 'right',
                     grid: {
@@ -262,7 +272,7 @@ function updateCharts() {
 function updateAll() {
     updateCharts();
     updateKPIs();
-    updateAllMetrics(); // ✅ VOLTOU
+    updateAllMetrics();
 }
 
 function calculateChange(oldVal, newVal) {
@@ -277,7 +287,6 @@ function getYearStartData(data) {
 }
 
 function updateChartMetrics(chartType) {
-
     const container = document.getElementById(chartType + "Metrics");
     if (!container) return;
 
@@ -289,12 +298,11 @@ function updateChartMetrics(chartType) {
 
     const last = data[data.length - 1];
     const prev = data[data.length - 2];
-
     const ytdData = getYearStartData(data);
 
     let html = '';
 
-    // HEADER (nomes das séries)
+    // HEADER
     html += '<div class="metrics-header">';
     html += '<div></div>';
     series.forEach(s => {
@@ -302,7 +310,6 @@ function updateChartMetrics(chartType) {
     });
     html += '</div>';
 
-    // TIPOS DE MÉTRICA
     const metrics = [
         { key: 'mom', label: 'MOM' },
         { key: 'ytd', label: 'YTD' },
@@ -310,12 +317,10 @@ function updateChartMetrics(chartType) {
     ];
 
     metrics.forEach(metric => {
-
         html += '<div class="metric-row">';
         html += `<div class="metric-row-label">${metric.label}</div>`;
 
         series.forEach(s => {
-
             let value = 0;
 
             if (metric.key === 'mom') {
@@ -367,7 +372,6 @@ function formatDateBR(date) {
 }
 
 function applyDateFilter() {
-
     const startInput = document.getElementById('startDate');
     const endInput = document.getElementById('endDate');
 
@@ -388,16 +392,42 @@ function applyDateFilter() {
     updateAll();
 }
 
+// ================= DRAG & DROP =================
+function dragOverHandler(event) {
+    event.preventDefault();
+}
+function dragEnterHandler(event) {
+    event.preventDefault();
+    event.currentTarget.classList.add('dragover');
+}
+function dragLeaveHandler(event) {
+    event.preventDefault();
+    event.currentTarget.classList.remove('dragover');
+}
+function dropHandler(event) {
+    event.preventDefault();
+    event.currentTarget.classList.remove('dragover');
+
+    const files = event.dataTransfer.files;
+    if (files && files.length > 0) {
+        const fakeEvent = { target: { files } };
+        handleFileSelect(fakeEvent);
+    }
+}
+
 // ================= INIT =================
 document.addEventListener('DOMContentLoaded', () => {
-
     loadDatabaseFile();
 
-    document.getElementById('startDate')
-        .addEventListener('change', applyDateFilter);
+    const startDate = document.getElementById('startDate');
+    const endDate = document.getElementById('endDate');
 
-    document.getElementById('endDate')
-        .addEventListener('change', applyDateFilter);
+    if (startDate) startDate.addEventListener('change', applyDateFilter);
+    if (endDate) endDate.addEventListener('change', applyDateFilter);
 });
 
 window.handleFileSelect = handleFileSelect;
+window.dragOverHandler = dragOverHandler;
+window.dragEnterHandler = dragEnterHandler;
+window.dragLeaveHandler = dragLeaveHandler;
+window.dropHandler = dropHandler;
