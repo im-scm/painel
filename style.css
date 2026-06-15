@@ -724,3 +724,10 @@ justify-content: center;
 min-width: 100%;
 }
 }
+
+.chart-source {
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    opacity: 0.85;
+}
